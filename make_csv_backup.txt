@@ -1,0 +1,110 @@
+import bs4
+import requests
+import csv
+
+URL_LINK = 'politics_main_page_url.csv'
+CSV_LINK = 'politics_dataset_janakantha_news.csv'
+
+def append_to_csv(row):
+
+    global CSV_LINK
+
+    with open(CSV_LINK, mode='a', newline='' , encoding='utf-8') as unit_new_article:
+           # news_article_writer = csv.writer(unit_new_article, delimiter=',' , quotchar='"', quoting=csv.QUOTE_MINIMAL)
+            news_article_writer = csv.writer(unit_new_article, delimiter=',' , quoting=csv.QUOTE_MINIMAL)
+            news_article_writer.writerow(row)
+
+    #news_article_writer.close()
+
+    pass
+
+import re
+def get_title_and_content(url):
+    BASE_URL = url
+    page = requests.get(BASE_URL)
+    #date = BASE_URL[41:51]
+    soup = bs4.BeautifulSoup(page.content, 'html.parser')
+
+
+    newsTitle = soup.find_all("h2")[0].getText()
+    newsTitle=newsTitle.strip()
+   # date = soup.find("span", {"title": " "})
+
+    #d=soup.find("div", {"class": "article-info mb-4 md-text-center"})
+    #date=d("span")
+    #print(date)
+
+    #newsDate = soup.find("div", {"class": "article-info mb-4 md-text-center"})
+
+
+    # as per recommendation from @freylis, compile once only
+    CLEANR = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+
+    def cleanhtml(raw_html):
+        cleantext = re.sub(CLEANR, '', raw_html)
+        return cleantext
+    Date = soup.find("div", {"class": "rpt_name border-top mt-1 pt-1"})
+    Date=str(Date.text)
+    newsDate = cleanhtml(Date)
+    #newsDate = soup.getText("div", {"class": "rpt_name border-top mt-1 pt-1"})
+    #newsDate= soup.getText(newsDate)
+
+
+
+    #newsDate = newsDate_1("i")
+    #newsDate = newsDate.strip()
+    #newsDate = soup.find("i", {"class": "fa fa-clock-o"})
+
+
+
+
+    #newsDate = newsDate.find_all("span")[0].getText()
+    #newsDate = newsDate.strip()
+    #print(newsDate)
+
+    #date=soup.find("d",{"span title"})
+    # date = soup.find_all("span")[0].getText()
+    #date = res["title"]
+    #print(newsTitle)
+
+    #article_text = soup.find("div", {"class": "article-details mb-5"})
+    article_text = soup.find("div", {"class": "dtl_section"})
+    all_paragraphs = article_text("p")
+    news_content = ""
+
+    for paragraph in all_paragraphs:
+
+        news_content += paragraph.getText()
+        news_content=news_content.strip()
+
+    #print(news_content)
+
+
+    cat="politics"
+    #cat=cat.strip()
+
+    input_array = [cat, newsDate , newsTitle , news_content]
+
+    append_to_csv(input_array)
+
+
+
+
+    pass
+
+
+
+with open(URL_LINK) as unit_url_csv:
+    readCSV = csv.reader(unit_url_csv)
+
+    i = 0
+
+    for row in readCSV:
+
+        #if i >= 500:
+           # break
+
+        print(i)
+        get_title_and_content(row[0])
+
+        i += 1
